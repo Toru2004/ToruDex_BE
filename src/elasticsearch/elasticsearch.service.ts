@@ -21,7 +21,6 @@ export class ElasticsearchServiceCustom {
         query: {
           bool: {
             should: [
-              // fuzzy search (cho phép sai ký tự, gần giống)
               {
                 multi_match: {
                   query,
@@ -29,7 +28,6 @@ export class ElasticsearchServiceCustom {
                   fuzziness: 'AUTO',
                 },
               },
-              // wildcard search (chứa ký tự bất kỳ)
               {
                 wildcard: {
                   content: {
@@ -51,7 +49,7 @@ export class ElasticsearchServiceCustom {
           text: query,
           simple_phrase: {
             phrase: {
-              field: 'content.trigram', // cần có field với analyzer kiểu shingle/trigram
+              field: 'content.trigram',
               size: 1,
               real_word_error_likelihood: 0.95,
               max_errors: 0.5,

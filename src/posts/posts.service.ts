@@ -6,7 +6,6 @@ export class PostsService {
   constructor(private readonly esService: ElasticsearchServiceCustom) {}
 
   async createPost(postData: any) {
-    // Bạn có thể thêm logic validate, lưu MongoDB/Firestore song song
     await this.esService.createPost({
       postId: postData.postId,
       username: postData.username,
