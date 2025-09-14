@@ -22,6 +22,19 @@ export class PostsService {
     return { success: true };
   }
 
+  async updatePost(
+    postId: string,
+    updateData: Partial<{ content: string; imageUrls: string[] }>,
+  ) {
+    await this.esService.updatePost(postId, updateData);
+    return { success: true };
+  }
+
+  async deletePost(postId: string) {
+    await this.esService.deletePost(postId);
+    return { success: true };
+  }
+
   async searchPosts(query: string) {
     return this.esService.searchPosts(query);
   }
