@@ -7,6 +7,10 @@ export class ElasticsearchServiceCustom {
 
   constructor(private readonly elasticsearchService: ElasticsearchService) {}
 
+  async onModuleInit() {
+    await this.ensureIndex();
+  }
+
   private async ensureIndex() {
     const exists = await this.elasticsearchService.indices.exists({
       index: this.index,
@@ -57,7 +61,7 @@ export class ElasticsearchServiceCustom {
           mappings: {
             dynamic: false,
             properties: {
-              postId: { type: 'keyword' }, // để tìm document khi update/delete
+              postId: { type: 'keyword' },
               username: {
                 type: 'text',
                 analyzer: 'vietnamese_custom',
@@ -86,11 +90,9 @@ export class ElasticsearchServiceCustom {
   }
 
   async createPost(post: any) {
-    await this.ensureIndex();
-
     return this.elasticsearchService.index({
       index: this.index,
-      id: post.postId, // dùng postId làm id document
+      id: post.postId,
       document: post,
     });
   }
