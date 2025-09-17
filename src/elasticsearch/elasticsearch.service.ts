@@ -97,7 +97,10 @@ export class ElasticsearchServiceCustom {
     });
   }
 
-  async updatePost(postId: string, updateData: Partial<{ content: string; imageUrls: string[] }>) {
+  async updatePost(
+    postId: string,
+    updateData: Partial<{ content: string; imageUrls: string[] }>,
+  ) {
     return this.elasticsearchService.update({
       index: this.index,
       id: postId,
@@ -128,45 +131,21 @@ export class ElasticsearchServiceCustom {
             ...(useFuzziness ? { fuzziness: 'AUTO' } : {}),
           },
         },
-        suggest: {
-          text: query,
-          vi_suggest: {
-            phrase: {
-              field: 'content.vi_suggest',
-              analyzer: 'vi_normalized',
-              size: 3,
-              real_word_error_likelihood: 0.95,
-              max_errors: 1,
-              direct_generator: [
-                {
-                  field: 'content.vi_suggest',
-                  suggest_mode: 'always',
-                },
-              ],
-            },
-          },
-        },
       },
     });
 
     const getTotal = (hits: any): number =>
       typeof hits.total === 'number' ? hits.total : hits.total?.value ?? 0;
 
-    let { hits, suggest } = await this.elasticsearchService.search(
-      buildQuery(false),
-    );
+    let { hits } = await this.elasticsearchService.search(buildQuery(false));
 
     if (getTotal(hits) === 0) {
       const fallback = await this.elasticsearchService.search(buildQuery(true));
       hits = fallback.hits;
-      suggest = fallback.suggest;
     }
 
     return {
       results: hits.hits.map((hit: any) => hit._source),
-      suggestions: Array.isArray(suggest?.vi_suggest?.[0]?.options)
-        ? (suggest.vi_suggest[0].options as any[]).map((o: any) => o.text)
-        : [],
     };
   }
 }
