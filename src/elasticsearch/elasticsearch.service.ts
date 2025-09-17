@@ -113,7 +113,7 @@ export class ElasticsearchServiceCustom {
   }
 
   async searchPosts(query: string) {
-    const { hits, suggest } = await this.elasticsearchService.search({
+    const buildQuery = (useFuzziness: boolean) => ({
       index: this.index,
       body: {
         query: {
@@ -125,7 +125,7 @@ export class ElasticsearchServiceCustom {
               'content',
               'content.normalized',
             ],
-            fuzziness: 'AUTO',
+            ...(useFuzziness ? { fuzziness: 'AUTO' } : {}),
           },
         },
         suggest: {
@@ -148,6 +148,19 @@ export class ElasticsearchServiceCustom {
         },
       },
     });
+
+    const getTotal = (hits: any): number =>
+      typeof hits.total === 'number' ? hits.total : hits.total?.value ?? 0;
+
+    let { hits, suggest } = await this.elasticsearchService.search(
+      buildQuery(false),
+    );
+
+    if (getTotal(hits) === 0) {
+      const fallback = await this.elasticsearchService.search(buildQuery(true));
+      hits = fallback.hits;
+      suggest = fallback.suggest;
+    }
 
     return {
       results: hits.hits.map((hit: any) => hit._source),
