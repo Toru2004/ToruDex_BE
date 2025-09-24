@@ -147,23 +147,23 @@ export class ElasticsearchServiceCustom {
               'content',
               'content.normalized',
             ],
-            fuzziness: 'AUTO',
+            fuzziness: 2,
           },
         },
       },
     };
 
-    const ngramQuery = {
-      index: this.index,
-      body: {
-        query: {
-          multi_match: {
-            query,
-            fields: ['content.vi_suggest'],
-          },
-        },
-      },
-    };
+    // const ngramQuery = {
+    //   index: this.index,
+    //   body: {
+    //     query: {
+    //       multi_match: {
+    //         query,
+    //         fields: ['content.vi_suggest'],
+    //       },
+    //     },
+    //   },
+    // };
 
     const getTotal = (hits: any): number =>
       typeof hits.total === 'number' ? hits.total : (hits.total?.value ?? 0);
@@ -176,10 +176,10 @@ export class ElasticsearchServiceCustom {
       hits = res.hits;
     }
 
-    if (getTotal(hits) === 0) {
-      res = await this.elasticsearchService.search(ngramQuery);
-      hits = res.hits;
-    }
+    // if (getTotal(hits) === 0) {
+    //   res = await this.elasticsearchService.search(ngramQuery);
+    //   hits = res.hits;
+    // }
 
     return {
       results: hits.hits.map((hit: any) => hit._source),
