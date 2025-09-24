@@ -153,6 +153,18 @@ export class ElasticsearchServiceCustom {
       },
     };
 
+    const ngramQuery = {
+      index: this.index,
+      body: {
+        query: {
+          multi_match: {
+            query,
+            fields: ['content.vi_suggest'],
+          },
+        },
+      },
+    };
+
     const getTotal = (hits: any): number =>
       typeof hits.total === 'number' ? hits.total : (hits.total?.value ?? 0);
 
@@ -161,6 +173,11 @@ export class ElasticsearchServiceCustom {
 
     if (getTotal(hits) === 0) {
       res = await this.elasticsearchService.search(fallbackQuery);
+      hits = res.hits;
+    }
+
+    if (getTotal(hits) === 0) {
+      res = await this.elasticsearchService.search(ngramQuery);
       hits = res.hits;
     }
 
