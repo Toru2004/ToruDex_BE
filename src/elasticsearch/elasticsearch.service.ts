@@ -120,16 +120,10 @@ export class ElasticsearchServiceCustom {
       index: this.index,
       body: {
         query: {
-          bool: {
-            should: [
-              {
-                multi_match: {
-                  query,
-                  fields: ['username', 'content'],
-                  fuzziness: 0,
-                },
-              },
-            ],
+          multi_match: {
+            query,
+            fields: ['username', 'content'],
+            fuzziness: 0,
           },
         },
       },
